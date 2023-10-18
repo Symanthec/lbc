@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <sys/errno.h>
 
-#include "calc/calc.h"
+#include <calc/calc.h>
 
-const char* EXIT_COMMAND = "quit\n";
-const char* PROMPT_STRING = ">>> ";
+#define EXIT_COMMAND	"quit"	
+#define PROMPT_STRING	">>> "
+#define MAXLINE 		256
 
-size_t line_caps = 2048;
 
-
-static ssize_t prompt(const char* prefix, char** dest, size_t *caps) {
-	printf("%s", prefix);
-	ssize_t total_read = getline(dest, caps, stdin);
-	return total_read;
+static bool prompt(const char* prefix, char* dest, size_t maxLength) {
+	fputs(prefix, stdout);
+	return fgets(dest, maxLength, stdin) != NULL;
 }
 
 
@@ -21,30 +21,27 @@ int main(int argc, char** argv)
 {
 	calcState_t *state = calc_newState();
 
-	char *line = malloc(line_caps);
+	char line[MAXLINE] = {0};
 	error_t err;
-	while (prompt(PROMPT_STRING, &line, &line_caps) != -1) {
-
+	while (prompt(PROMPT_STRING, line, MAXLINE))
+	{
 		// Exit sequence
-		if (strcmp(line, EXIT_COMMAND) == 0)
-			goto quit;
-
+		if (strstr(line, EXIT_COMMAND) != NULL)
+			break;
 
 		value_t result = calc_doLine(state, line);
-
-		if ((err = calc_getError(state)).code != OK) {
+		err = calc_getError(state);
+		if (err.code != OK) {
 			const char* msg = calc_getErrorMsg(err.code);
-			fprintf(stderr,
+			fprintf(
+				stderr,
 				"Error occurred while evaluating expression: %s\n",
 				msg);
 			calc_clearError(state);
 		}
 	}
 
-getline_error:
-	fprintf(stderr, "Error occurred while reading line...\n");
-quit:
-	// Enumerate ids
+	// Enumerate identifiers, because why not?
 	calc_freeState(state);
 	return 0;
 }

@@ -3,9 +3,6 @@
 #define CALC_ERROR_H
 
 
-#include "state.h"
-
-
 enum Errors {
 	OK,
 	END_OF_FILE, // Unexpected end of line
@@ -20,6 +17,9 @@ typedef struct error_t {
 	enum Errors code;
 	unsigned at;
 } error_t;
+
+
+#include "state.h"
 
 
 extern const error_t NO_ERROR;

@@ -8,8 +8,8 @@ struct calcState_t;
 typedef struct calcState_t calcState_t;
 
 
-#include "ident.h"
-#include "error.h"
+#include <calc/ident.h>
+#include <calc/error.h>
 
 
 typedef struct calcState_t {
