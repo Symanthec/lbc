@@ -16,10 +16,10 @@ static const char* NAMES[] = {
 	// Parentheses
 	"LPAREN",
 	"RPAREN",
-	// C-string-like terminating token
-	"END",
 	// What starts with tilde must not occur in valid lines list
 	// Inner (service) or erroneous "tokens"
+
+	"~END", 			// C-string-like terminating token
 	"~WHITESPACE",
 	"~MULTICHAR",
 	"~INVALID"

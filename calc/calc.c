@@ -1,11 +1,10 @@
-#include <calc/calc.h>
 #include <calc/lang/lexer.h>
-#include <calc/parser.h>
+#include <calc/lang/parser.h>
+#include <calc/utils.h>
 
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdlib.h>
-
 
 value_t calc_doLine(calcState_t *state, const char* in) {
 	TokenVector *tokens = lang_tokenizeLine(in);
@@ -24,27 +23,31 @@ value_t calc_doLine(calcState_t *state, const char* in) {
 	if (error) {
 		// set error on (err - start)th symbol
 		Token err_token = tokens->tokens[errToken];
-		error_t e = { SYNTAX, err_token.slice.start - in };
+		error_t e = { SYNTAX, err_token.slice };
 		calcP_setError(state, e);
 	} else {
+		// calcU_printTokens(tokens, stdout);
 		// parse valid lexemes
-		ParserResult parseResult = calcP_parseTokens(tokens);
+		AST *parseResult = lang_parseTokens(*tokens);
+		if (parseResult != NULL) {
+			if (parseResult->type == ERROR) {
+				// set error
+				error_t e = parseResult->error;
+				calcP_setError(state, e);
+			} else {
+				calcU_printTree(parseResult, stdout);
+				// print value
+				result = calcP_run(state, parseResult);
 
-		if (parseResult.success != OK) {
-			error_t err = parseResult.error;
-			calcP_setError(state, err);
-		} else {
-			AST* ast = parseResult.tree;
-			result = calc_doAST(state, ast);
-			// free ast
+				if (calc_getError(state).code == OK)
+					calcP_commit(state); // save changes on success
+			}
+
 		}
+	
+		lang_freeTree(parseResult);
 	}
 
 	lang_freeTokens(tokens);
 	return result;
-}
-
-
-value_t calc_doAST(calcState_t *state, AST* tree) {
-	return NIL;
 }

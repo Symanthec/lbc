@@ -64,7 +64,7 @@ static Token pickNumber(const char* start) {
 	if ((*in == '-') || (*in == '+'))
 		in += 1;
 
-	bool real = false;
+	bool real = false, digits = false;
 	char sym;
 	do {
 		sym = *in;
@@ -79,22 +79,33 @@ static Token pickNumber(const char* start) {
 				// dot => indicator of real number
 				real = true;
 		} 
-		else if (!isdigit(sym)) 
+		else if (isdigit(sym)) 
 		{
+			digits = true;
+		} else {
 			// not dot but not digit
 			break;
 		}
 
 		// digit or first dot => fine
 		in += 1;
-	} while (true);
+	} while (*in != '\n');
 
-	Slice s = { start, in - start };
-	Token t = {
-		real ? T_REAL : T_INTEGER,
-		s
-	};
-	return t;
+	if (digits) {
+		Slice s = { start, in - start };
+		Token t = {
+			real ? T_REAL : T_INTEGER,
+			s
+		};
+		return t;
+	} else {
+		Slice s = { start , 1 };
+		Token bad = {
+			INVAL,
+			s
+		};
+		return bad;
+	}
 }
 
 
@@ -125,16 +136,22 @@ TokenVector* lang_tokenizeLine(const char* line) {
 	TokenVector *vec = lang_newTokens();
 
 	const char* input = line;
-	bool afterMulti = false;
+	bool afterMulti = false, afterOp = true;
 	Token t;
 	do {
 		// try lex'ing one symbol
 		t = pickSymbol(input);
 
+		if ((t.type == SUB || t.type == ADD) && afterOp) {
+			// minus after operator like 10 * -3
+			t = pickNumber(input);
+			afterOp = false;
+		}
+
 		if (t.type == MULTI)
 		{
 			if (!afterMulti) {
-				if (isdigit(*input) || (*input == '.')) {
+				if (isdigit(*input) || (*input == '.') || (*input == '-')) {
 					t = pickNumber(input);
 				} else { // if (*input == '_' || isletter(*input))
 					t = pickIdentifier(input);
@@ -148,8 +165,11 @@ TokenVector* lang_tokenizeLine(const char* line) {
 			afterMulti = false;
 		}
 
-		if ((t.type != WHITE) && (t.type != END))
+
+		if ((t.type != WHITE) && (t.type != END)) {
 			vec = lang_pushToken(vec, t);
+			afterOp = ADD <= t.type && t.type <= EQU;
+		}
 		input += t.slice.length;
 	} while (t.type != END);
 	return vec;

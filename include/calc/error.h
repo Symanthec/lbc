@@ -2,6 +2,7 @@
 #ifndef CALC_ERROR_H
 #define CALC_ERROR_H
 
+#include <calc/lang/token.h>
 
 enum Errors {
 	OK,
@@ -15,7 +16,7 @@ enum Errors {
 
 typedef struct error_t {
 	enum Errors code;
-	unsigned at;
+	Slice slice;
 } error_t;
 
 
@@ -34,5 +35,6 @@ extern void calcP_setError(calcState_t*, error_t);
 
 extern void calc_clearError(calcState_t*);
 
+extern error_t calc_mkError(enum Errors t, Slice s);
 
 #endif//CALC_ERROR_H

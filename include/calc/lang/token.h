@@ -12,6 +12,8 @@ typedef struct {
 
 // Enumeration of possible token types
 typedef enum {
+	FALSE,		//false for conditions only
+
 	T_NIL, 		// "nil" from Lua
 	T_IDENT,		// variable
 	T_REAL,		// "double" value
@@ -31,7 +33,7 @@ typedef enum {
 	
 	// Some intermediate tokens, which must not occur in
 	// final VALID sequence of tokens
-	END,	// End of line
+	END, 	// End of line/sequence, 
 	WHITE,	// Whitespace character 
 	MULTI,	// pickSymbol() indicator of identifier or number
 	INVAL	// Invalid character, error indicator
@@ -43,6 +45,6 @@ typedef struct Token {
 } Token;
 
 // Return human readable name of token
-const char* lang_tokenName(TokenType type);
+extern const char* lang_tokenName(TokenType type);
 
 #endif//CALC_LANG_TOKEN_H

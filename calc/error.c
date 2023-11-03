@@ -1,18 +1,18 @@
 #include <calc/calc.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 
-const error_t NO_ERROR = { OK, 0 };
-const error_t BAD_STATE = { BAD_ID, -1 }; 
+const error_t NO_ERROR = { OK, NULL };
+const error_t BAD_STATE = { BAD_ID, NULL }; 
 
 
 const char* ERROR_MESSAGES[] = {
-	"No error",			// OK
+	"No error",					// OK
 	"Unexpected end of file",	// END_OF_FILE
 	"Unknown identifier",		// BAD_ID
-	"Syntax error",			// SYNTAX
-	"Bad variable type",		// BAD_TYPE
-	"Zero division",		// ZERO
+	"Syntax error",				// SYNTAX
+	"Bad type",					// BAD_TYPE
+	"Zero division",			// ZERO
 };
 
 
@@ -41,4 +41,9 @@ void calcP_setError(calcState_t *state, error_t err) {
 void calc_clearError(calcState_t *state) {
 	if (state == NULL) return;
 	state->error = NO_ERROR;
+}
+
+error_t calc_mkError(enum Errors t, Slice s) {
+	error_t e = { t, s };
+	return  e;
 }

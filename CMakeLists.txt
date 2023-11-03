@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.27)
 project(bc)
 
 
-set( GCC_COVERAGE_COMPILE_FLAGS "-Wall" )
+set( GCC_COVERAGE_COMPILE_FLAGS "-Wall -Wpedantic" )
 add_subdirectory(calc)
 
 

@@ -16,18 +16,18 @@ typedef TokenVector TokenList;
 
 
 // Create vector for tokens
-TokenVector* lang_newTokens(void);
+extern TokenVector* lang_newTokens(void);
 
 
 // Push token into vector
 // If vec == NULL, creates new vector
 // Automatically resizes vector when needed
 // Returns pointer to new vector or original (!= NULL)
-TokenVector* lang_pushToken(TokenVector *vec, Token t);
+extern TokenVector* lang_pushToken(TokenVector *vec, Token t);
 
 
 // Destroy vector of tokens
-void lang_freeTokens(TokenList* vec);
+extern void lang_freeTokens(TokenList* vec);
 
 
 #endif//CALC_LANG_TOKEN_VECTOR_H

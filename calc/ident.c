@@ -1,8 +1,9 @@
 #include <string.h>
 #include <stdlib.h>
-
+#include <stdio.h>
 #include <calc/ident.h>
 #include <calc/value.h>
+#include <calc/utils.h>
 
 
 #define MAX(x, y) ((x) >= (y) ? (x): (y))
@@ -13,8 +14,8 @@ identList_t* calcP_newIdentList(void) {
 	list->left = NULL;
 	list->right = NULL;
 	list->identifier.value = NIL;
-	list->height = 1;
 	memset(list->identifier.name, '\0', IDENTIFIER_LENGTH);
+	// printf("List created at %p\n", list);
 	return list;
 }
 
@@ -26,6 +27,7 @@ void calcP_freeIdentList(identList_t* list) {
 		calcP_freeIdentList(list->left);
 	if (list->right != NULL)
 		calcP_freeIdentList(list->right);
+	// printf("Rm list %p\n", list);
 	free(list);
 }
 
@@ -55,18 +57,19 @@ static inline identList_t* findIdentifier(identList_t* list, const char* name) {
 
 value_t calc_valueOf(identList_t* list, const char* name) {
 	identList_t* ident = findIdentifier(list, name);
-	return ident != NULL ? ident->identifier.value: NIL;
+	value_t result = ident != NULL ? ident->identifier.value: NIL;
+	return result;
 }
 
 
-/** Assigns new value to identifier with given name and creates it if necessary
- ** It also allows to remove identifier by assigning NIL to it */
-void calc_setIdentifier(identList_t* node, const char* name, value_t val) {
-	if (node == NULL) return;
-	
-	if (calc_isValueNil(&val)) {
-		calc_popIdentifier(node, name);
-		return;
+value_t calcP_setRawIdent(identList_t * node, const char* name, value_t val) {
+	// printf("rawset %s = ", name);
+	// calcU_printValue(val);
+	if (strlen(node->identifier.name) == 0) {
+		// empty (primary) node
+		strncpy(node->identifier.name, name, IDENTIFIER_LENGTH);
+		node->identifier.value = val;
+		return NIL;
 	}
 
 	identList_t* prev;
@@ -75,13 +78,14 @@ void calc_setIdentifier(identList_t* node, const char* name, value_t val) {
 		cmp = strncmp(name, node->identifier.name, IDENTIFIER_LENGTH);
 		if (cmp == 0) {
 			// Identifier exists
+			value_t old = node->identifier.value;
 			node->identifier.value = val;
-			return;
+			return old;
 		} else {
 			prev = node;
 			if (cmp < 0)
 				node = node->left;
-			else
+			else // cmp > 0
 				node = node->right;
 		}
 	}
@@ -90,26 +94,29 @@ void calc_setIdentifier(identList_t* node, const char* name, value_t val) {
 	identList_t *id = calcP_newIdentList();
 	strncpy(id->identifier.name, name, IDENTIFIER_LENGTH);
 	id->identifier.value = val;
-	id->height = prev->height + 1;
 
 	if (cmp < 0)
 		prev->left = id;
 	else
 		prev->right = id;
+	return NIL; // since we had to create variable	
 }
 
 
-/** Return maximum height of the tree */
-unsigned calc_listHeight(identList_t* list) {
-	if (list == NULL) return 0;
-	unsigned l = calc_listHeight(list->left), r = calc_listHeight(list->right);
-	return MAX(l, r) + 1;
+/** Assigns new value to identifier with given name and creates it if necessary
+ ** It also allows to remove identifier by assigning NIL to it */
+value_t calc_setIdentifier(identList_t* node, const char* name, value_t val) {
+	if (node == NULL) return NIL;
+
+	if (calc_isValueNil(&val))
+		return calc_popIdentifier(node, name);
+	else
+		return calcP_setRawIdent(node, name, val);
 }
 
 
 static inline identList_t* deleteIdentifier(identList_t* root, const char* name) {
 	if (root == NULL) return NULL;
-
 	int cmp = strncmp(name, root->identifier.name, IDENTIFIER_LENGTH);
 	if (cmp > 0) {
 		root->right = deleteIdentifier(root->right, name);
@@ -117,17 +124,19 @@ static inline identList_t* deleteIdentifier(identList_t* root, const char* name)
 	} else if (cmp < 0) {
 		root->left = deleteIdentifier(root->left, name);
 		return root;
-	} 
+	}
 
 
 	// We reach here when root is the node to be deleted.
 	if (root->left == NULL) {
 		identList_t *temp = root->right;
-		free(root);
+		root->left = root->right = NULL;
+		calcP_freeIdentList(root);
 		return temp;
 	} else if (root->right == NULL) {
 		identList_t *temp = root->left;
-		free(root);
+		root->left = root->right = NULL;
+		calcP_freeIdentList(root);
 		return temp;
 	}
 
@@ -147,18 +156,16 @@ static inline identList_t* deleteIdentifier(identList_t* root, const char* name)
 			succParent->right = succ->right;
 
 		root->identifier = succ->identifier;
-		free(succ);
+		succ->left = succ->right = NULL;
+		calcP_freeIdentList(succ);
 		return root;
 	}
 }
 
-/** Remove identifier by the name from the list and return its value */
+// Remove identifier by the name from the list and return its value
 value_t calc_popIdentifier(identList_t* list, const char* name) {
 	if (list == NULL) return NIL;
 	
 	identList_t *node = deleteIdentifier(list, name);
-	if (node != NULL && calc_isValueNil(&(node->identifier.value)) )
-		return node->identifier.value;	
-	else
-		return NIL;
+	return node != NULL ? node->identifier.value : NIL;
 }
