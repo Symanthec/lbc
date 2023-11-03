@@ -15,7 +15,6 @@ identList_t* calcP_newIdentList(void) {
 	list->right = NULL;
 	list->identifier.value = NIL;
 	memset(list->identifier.name, '\0', IDENTIFIER_LENGTH);
-	// printf("List created at %p\n", list);
 	return list;
 }
 
@@ -27,7 +26,6 @@ void calcP_freeIdentList(identList_t* list) {
 		calcP_freeIdentList(list->left);
 	if (list->right != NULL)
 		calcP_freeIdentList(list->right);
-	// printf("Rm list %p\n", list);
 	free(list);
 }
 
@@ -63,8 +61,6 @@ value_t calc_valueOf(identList_t* list, const char* name) {
 
 
 value_t calcP_setRawIdent(identList_t * node, const char* name, value_t val) {
-	// printf("rawset %s = ", name);
-	// calcU_printValue(val);
 	if (strlen(node->identifier.name) == 0) {
 		// empty (primary) node
 		strncpy(node->identifier.name, name, IDENTIFIER_LENGTH);

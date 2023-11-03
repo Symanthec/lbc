@@ -2,9 +2,14 @@
 #ifndef CALC_AST_H
 #define CALC_AST_H
 
+
+struct AST;
+typedef struct AST AST;
+
+
 #include <calc/lang/tokenvector.h>
-#include <calc/state.h>
 #include <calc/error.h>
+#include <calc/state.h>
 
 
 

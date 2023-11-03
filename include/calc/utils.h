@@ -4,11 +4,11 @@
 
 
 // Print all tokens from token list to file
-extern void calcU_printTokens(TokenList* list, FILE* stream);
+extern void calcU_printTokens(TokenList* list);
 
 
 // Print abstract syntax tree to file
-extern void calcU_printTree(AST* tree, FILE* stream);
+extern void calcU_printTree(AST* tree);
 
 
 extern void calcU_printIdent(ident_t id);

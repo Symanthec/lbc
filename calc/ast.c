@@ -150,13 +150,7 @@ value_t calcP_run(calcState_t * state, AST* tree) {
 			// recast back into previous type
 			// could also be put into diff option
 			value_t prev = calc_getValue(state, name);
-			if (prev.type == VALUE_INT && right.type == VALUE_REAL) {
-				right.type = VALUE_INT;
-				right.integer = right.real;
-			} else if (prev.type == VALUE_REAL && right.type == VALUE_INT) {
-				right.type = VALUE_REAL;
-				right.real = right.integer;
-			}
+			right = (state->valueCaster)(prev, right);
 
 			calc_setValue(state, name, right);
 			result = right;

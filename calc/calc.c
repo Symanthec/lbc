@@ -26,7 +26,9 @@ value_t calc_doLine(calcState_t *state, const char* in) {
 		error_t e = { SYNTAX, err_token.slice };
 		calcP_setError(state, e);
 	} else {
-		// calcU_printTokens(tokens, stdout);
+		if (state->debugTokens != NULL)
+			(state->debugTokens)(tokens);
+
 		// parse valid lexemes
 		AST *parseResult = lang_parseTokens(*tokens);
 		if (parseResult != NULL) {
@@ -35,7 +37,9 @@ value_t calc_doLine(calcState_t *state, const char* in) {
 				error_t e = parseResult->error;
 				calcP_setError(state, e);
 			} else {
-				calcU_printTree(parseResult, stdout);
+				if (state->debugTree != NULL) 
+					(state->debugTree)(parseResult);
+
 				// print value
 				result = calcP_run(state, parseResult);
 

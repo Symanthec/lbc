@@ -39,6 +39,8 @@ static void printError(const char *line, error_t err) {
 int main(int argc, char** argv)
 {
 	calcState_t *state = calc_newState();
+	// calcU_onDebugTree(state, calcU_printTree);
+	// calcU_onDebugTokens(state, calcU_printTokens);
 
 	char line[MAXLINE] = {0}, del_pending[MAXLINE] = {0};
 	error_t err;
@@ -62,6 +64,7 @@ int main(int argc, char** argv)
 			err = calc_getError(state);
 			if (err.code == OK) {
 				calcU_printValue(result);
+				putchar('\n');
 			} else {
 				printError(line, err);
 				calc_clearError(state);
@@ -69,6 +72,7 @@ int main(int argc, char** argv)
 		}
 
 		calcU_printIdentifiers(state->identifiers);
+		putchar('\n');
 	}
 
 	// Enumerate identifiers, because why not?

@@ -1,6 +1,19 @@
 #include <calc/calc.h>
 #include <stdlib.h>
-#include <stdio.h>
+
+
+static void fnDbgTree(AST* tree) {return;}
+static void fnDbgTokens(TokenList* list) {return;}
+static value_t fnCbCast(value_t old, value_t right) {
+	if (old.type == VALUE_INT && right.type == VALUE_REAL) {
+		right.type = VALUE_INT;
+		right.integer = right.real;
+	} else if (old.type == VALUE_REAL && right.type == VALUE_INT) {
+		right.type = VALUE_REAL;
+		right.real = right.integer;
+	}
+	return right;
+}
 
 
 calcState_t * calc_newState(void) {
@@ -8,6 +21,10 @@ calcState_t * calc_newState(void) {
 	state->identifiers = calcP_newIdentList();
 	state->staging = calcP_newIdentList();
 	state->error = NO_ERROR;
+	// default callbacks
+	calcU_onDebugTree(state, fnDbgTree);
+	calcU_onDebugTokens(state, fnDbgTokens);
+	calcU_castBehaviour(state, fnCbCast);
 	return state;
 }
 
@@ -48,3 +65,29 @@ void calcP_commit(calcState_t* state) {
 	calcP_freeIdentList(state->staging);
 	state->staging = calcP_newIdentList();
 }
+
+
+#define REPLACE_CB(type, where, name, new)	\
+	if (new != NULL && where != NULL) { 	\
+		type old = where->name;				\
+		where->name = new;					\
+		return old;							\
+	}										\
+	return NULL;
+
+
+calc_fnDbgTree calcU_onDebugTree(calcState_t *state, calc_fnDbgTree cb) {
+	REPLACE_CB(calc_fnDbgTree, state, debugTree, cb);
+}
+
+
+calc_fnDbgTokens calcU_onDebugTokens(calcState_t *state, calc_fnDbgTokens cb) {
+	REPLACE_CB(calc_fnDbgTokens, state, debugTokens, cb);
+}
+
+
+calc_fnCbCast calcU_castBehaviour(calcState_t *state, calc_fnCbCast cb) {
+	REPLACE_CB(calc_fnCbCast, state, valueCaster, cb);
+}
+
+#undef REPLACE_CB
