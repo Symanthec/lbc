@@ -61,7 +61,7 @@ value_t calc_valueOf(identList_t* list, const char* name) {
 
 
 value_t calcP_setRawIdent(identList_t * node, const char* name, value_t val) {
-	if (strlen(node->identifier.name) == 0) {
+		if (strlen(node->identifier.name) == 0) {
 		// empty (primary) node
 		strncpy(node->identifier.name, name, IDENTIFIER_LENGTH);
 		node->identifier.value = val;
@@ -104,15 +104,33 @@ value_t calcP_setRawIdent(identList_t * node, const char* name, value_t val) {
 value_t calc_setIdentifier(identList_t* node, const char* name, value_t val) {
 	if (node == NULL) return NIL;
 
-	if (calc_isValueNil(&val))
+	if (calc_isValueNil(&val)) 
 		return calc_popIdentifier(node, name);
 	else
 		return calcP_setRawIdent(node, name, val);
 }
 
 
+static inline void swapNodes(identList_t *one, identList_t*two) {
+	ident_t swp = one->identifier;
+	one->identifier = two->identifier;
+	two->identifier = swp;
+
+	identList_t *pswp = one->left;
+	one->left = two->left;
+	two->left = pswp;
+
+	pswp = one->right;
+	one->right = two->right;
+	two->right = pswp;
+}
+
+
+// Since this list is pointed to from outside, we cannot delete root without
+// leaks and bugs, so any node to be deleted is swapped first
 static inline identList_t* deleteIdentifier(identList_t* root, const char* name) {
 	if (root == NULL) return NULL;
+	
 	int cmp = strncmp(name, root->identifier.name, IDENTIFIER_LENGTH);
 	if (cmp > 0) {
 		root->right = deleteIdentifier(root->right, name);
@@ -126,14 +144,16 @@ static inline identList_t* deleteIdentifier(identList_t* root, const char* name)
 	// We reach here when root is the node to be deleted.
 	if (root->left == NULL) {
 		identList_t *temp = root->right;
-		root->left = root->right = NULL;
-		calcP_freeIdentList(root);
-		return temp;
+		swapNodes(temp, root);
+		temp->left = temp->right = NULL;
+		calcP_freeIdentList(temp);
+		return root;
 	} else if (root->right == NULL) {
 		identList_t *temp = root->left;
-		root->left = root->right = NULL;
-		calcP_freeIdentList(root);
-		return temp;
+		swapNodes(temp, root);
+		temp->left = temp->right = NULL;
+		calcP_freeIdentList(temp);
+		return root;
 	}
 
 	// Both children exist
