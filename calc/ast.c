@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
+#include <math.h>
+#include <float.h>
 
 
 #define _ALLOC_VAR_NAME(slice, size, dst)		\
@@ -156,6 +158,16 @@ value_t calcP_run(calcState_t * state, AST* tree) {
 			result = right;
 		} else {
 			value_t left = calcP_run(state, tree->lop);
+
+			if (op.type == DIV) {
+				double div = right.type == VALUE_REAL ? right.real : right.integer;
+				if (fabs(div) < DBL_EPSILON) {
+					error_t e = calc_mkError(ZERO, tree->rop->token.slice);
+					calcP_setError(state, e);
+					return NIL;
+				}
+			}
+
 			result = runOp(
 				state,
 				op.type,
