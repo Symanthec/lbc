@@ -41,13 +41,13 @@ typedef value_t (* calc_fnCbCast) (const value_t, const value_t);
 ** NOTE: Variables and errors may differ between states.
 */
 typedef struct calcState_t {
-	identList_t* identifiers;	/* Variables storage */
-	identList_t* staging;		/* List to store variable's changes */
-	error_t error;				/* Last created error */
+    identList_t* identifiers;   /* Variables storage */
+    identList_t* staging;       /* List to store variable's changes */
+    error_t error;              /* Last created error */
 
-	calc_fnDbgTree		debugTree;	 /* AST create callback */
-	calc_fnDbgTokens 	debugTokens; /* Token list create callback */
-	calc_fnCbCast 		valueCaster; /* Type cast callback */
+    calc_fnDbgTree      debugTree;   /* AST create callback */
+    calc_fnDbgTokens    debugTokens; /* Token list create callback */
+    calc_fnCbCast       valueCaster; /* Type cast callback */
 } calcState_t;
 
 
@@ -63,8 +63,8 @@ extern void calc_freeState(calcState_t * const state);
 ** Returns current value of variable. Current value doesn't change immediately
 ** after calling calc_setValue() - changes should be calc_commit()-ed first.
 */
-extern value_t calc_getValue(const calcState_t * const 	state,
-							const char * const 			name);
+extern value_t calc_getValue(const calcState_t * const  state,
+                             const char * const         name);
 
 
 /*
@@ -72,9 +72,22 @@ extern value_t calc_getValue(const calcState_t * const 	state,
 ** NOTE: It doesn't change variables value immediately - changes need to be
 ** committed. See calcP_commit()
 */
-extern value_t calc_setValue(calcState_t * const 	state,
-							const char * const 		name,
-							const value_t			val);
+extern value_t calc_setValue(calcState_t * const    state,
+                             const char * const     name,
+                             const value_t          val);
+
+
+/* calc_setValue() override for quick integers */
+extern value_t calc_setValueI(calcState_t * const state,
+                              const char * const  name,
+                              const long          integer);
+
+
+/* calc_setValue() override for quick reals */
+extern value_t calc_setValueD(calcState_t * const state,
+                              const char * const  name,
+                              const double        real);
+
 
 
 /*
@@ -89,8 +102,8 @@ extern void calc_commit(calcState_t * const state);
 ** Sets new callback which is invoked by other functions when AST is created
 ** for given state. Returns old callback.
 */
-extern calc_fnDbgTree calcU_onDebugTree(calcState_t * const		state,
-										const calc_fnDbgTree	callback);
+extern calc_fnDbgTree calcU_onDebugTree(calcState_t * const     state,
+                                        const calc_fnDbgTree    callback);
 
 
 
@@ -98,8 +111,8 @@ extern calc_fnDbgTree calcU_onDebugTree(calcState_t * const		state,
 ** Sets new callback which is invoked by other functions when token list is
 ** created for given state. Returns old callback.
 */
-extern calc_fnDbgTokens calcU_onDebugTokens(calcState_t * const 	state,
-											const calc_fnDbgTokens 	callback);
+extern calc_fnDbgTokens calcU_onDebugTokens(calcState_t * const     state,
+                                            const calc_fnDbgTokens  callback);
 
 
 /*
@@ -107,7 +120,7 @@ extern calc_fnDbgTokens calcU_onDebugTokens(calcState_t * const 	state,
 ** type of variable. This behaviour may be changed with this callback.
 ** Returns old cast callback.
 */
-extern calc_fnCbCast calcU_castBehaviour(calcState_t * const 	state,
-										const calc_fnCbCast 	callback);
+extern calc_fnCbCast calcU_castBehaviour(calcState_t * const    state,
+                                        const calc_fnCbCast     callback);
 
 #endif/* CALC_STATE_H */

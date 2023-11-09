@@ -16,6 +16,20 @@ void calcU_printTokens(const TokenList* list) {
 }
 
 
+
+
+static unsigned char __precision = 6;
+char fltPrintFormat[8] = "%.6lf";
+const char fltPrintFormatFormat[] = "%%.%ulf";
+
+unsigned char calcU_floatPrintPrecision(unsigned char precision) {
+	unsigned char old = __precision;
+	__precision = precision;
+	snprintf(fltPrintFormat, 8, fltPrintFormatFormat, precision);
+	return old;
+}
+
+
 void calcU_printValue(const value_t v) {
     switch(v.type) {
     case VALUE_NIL:
@@ -25,7 +39,7 @@ void calcU_printValue(const value_t v) {
         printf("%ld", v.integer);
         break;
     case VALUE_REAL:
-        printf("%lf", v.real);
+        printf(fltPrintFormat, v.real);
         break;
     };
 }
@@ -72,12 +86,17 @@ void calcU_printIdent(const ident_t id) {
 }
 
 
+static inline bool shouldPrint(const char * const name) {
+	return strncmp(name, "__", 2) != 0;
+}
+
+
 static void __calcU_printIdentifiers(const identList_t *ids, unsigned *counter) {
 	if (ids == NULL) return;
 	__calcU_printIdentifiers(ids->left, counter);
 	
 	// is stub node?
-	if (*(ids->identifier.name) != '\0') {
+	if (*(ids->identifier.name) != '\0' && shouldPrint(ids->identifier.name)) {
 		if ((*counter)++ > 0) printf(", ");
 		calcU_printIdent(ids->identifier);
 	}

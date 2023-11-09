@@ -33,9 +33,14 @@ extern void calcU_printTree(const AST * const tree);
 extern void calcU_printIdent(const ident_t id);
 
 
+
+/* Changes precision of floats when those are printed */
+extern unsigned char calcU_floatPrintPrecision(unsigned char precision);
+
+
 /*
 ** Prints calculator-type value. 
-** Real numbers are printed with precision of CALC_PRNT_VAL_PREC (default = 6)
+** Real numbers are printed with precision of 6. Change with calcU_precision()
 ** See "calc/value.h"
 */
 extern void calcU_printValue(const value_t value);
