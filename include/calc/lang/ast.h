@@ -3,7 +3,6 @@
 #define CALC_AST_H
 
 
-struct AST;
 typedef struct AST AST;
 
 
@@ -12,9 +11,7 @@ typedef struct AST AST;
 #include <calc/state.h>
 
 
-
-
-
+/* AST node type enumeration */
 typedef enum {
 	OPERATION,	// Operation
 	IDENTIFIER,	// Variable
@@ -23,11 +20,12 @@ typedef enum {
 } NodeType;
 
 
+/* Abstract syntax tree (AST) node structure */
 typedef struct AST {
 	NodeType type;
-	Token token;
+	Token token; /* The token this node is made from */
 	union {
-		// either nodes or error
+		/* Either operands' nodes or error */
 		struct {
 			struct AST* lop;
 			struct AST* rop;
@@ -37,20 +35,23 @@ typedef struct AST {
 } AST;
 
 
-// Create new syntax tree
-extern AST* lang_newTree();
+/* Create new syntax tree node and returns it. */
+extern AST* langP_newTree(void);
 
 
-// Destroy all tree
-extern void lang_freeTree(AST *);
+/* Releases the syntax tree */
+extern void lang_freeTree(AST * const tree);
 
 
-// Node name
-extern const char* lang_nodeName(NodeType t);
+/* Return human-readable name of the nodes type */
+extern const char* lang_nodeName(const NodeType type);
 
 
-// Evaluate expression using identifiers of given calcState_t
-extern value_t calcP_run(calcState_t *, AST*);
+/*
+** Evaluate AST using given state. Cast behaviour and variables values are
+** inherited from state, error is also set there.
+*/
+extern value_t calc_run(calcState_t * const state, const AST * const tree);
 
 
-#endif//CALC_AST_H
+#endif/* CALC_AST_H */

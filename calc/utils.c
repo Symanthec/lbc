@@ -1,5 +1,6 @@
 #include <calc/utils.h>
 #include <stdio.h>
+#include <string.h>
 
 void calcU_printTokens(const TokenList* list) {
 	for (int i = 0; i < list->size; ++i) {
@@ -91,4 +92,22 @@ unsigned calcU_printIdentifiers(const identList_t *ids) {
 	__calcU_printIdentifiers(ids, &counter);
 	putchar(']');
 	return counter;
+}
+
+
+void calcU_printError(const calcState_t * const state, const char * const line) {
+	const error_t err = calc_getError(state);
+	
+	fprintf(stderr,
+		"[Calc error]: %s at %zu\n",
+		calc_getErrorMsg(err.code),
+		err.where.start - line + 1);
+
+	size_t len = strlen(line);
+	fprintf(stderr, "%s", line);
+	for (size_t i = 0; i < err.where.start - line && i < len; ++i)
+		fputc(' ', stderr);
+	for (size_t i = 0; i < err.where.length && i < len; ++i)
+		fputc('^', stderr);
+	fputc('\n', stderr);
 }

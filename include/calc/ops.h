@@ -5,19 +5,24 @@
 #include "value.h"
 
 
-extern value_t calc_add(value_t, value_t);
+/* Addition operation between values */
+extern value_t calc_add(const value_t, const value_t);
 
 
-extern value_t calc_sub(value_t, value_t);
+/* Subtraction operation between values */
+extern value_t calc_sub(const value_t, const value_t);
 
 
-extern value_t calc_mul(value_t, value_t);
+/* Multiplication operation between values */
+extern value_t calc_mul(const value_t, const value_t);
 
 
-extern value_t calc_div(value_t, value_t);
+/* Division operation between values */
+extern value_t calc_div(const value_t, const value_t);
 
 
-extern value_t calc_mod(value_t, value_t);
+/* Modulo division operation between values */
+extern value_t calc_mod(const value_t, const value_t);
 
 
-#endif//CALC_OPS_H
+#endif /* CALC_OPS_H */

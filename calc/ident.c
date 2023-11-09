@@ -3,7 +3,7 @@
 #include <calc/utils.h>
 #include <stdlib.h>
 #include <string.h>
-
+// #include <stdio.h>
 
 #define MAX(x, y) ((x) >= (y) ? (x): (y))
 
@@ -12,13 +12,14 @@ static inline void __stubNode(identList_t *node) {
 	node->left = NULL;
 	node->right = NULL;
 	node->identifier.value = NIL;
-	memset(node->identifier.name, '\0', IDENTIFIER_LENGTH);
+	memset(node->identifier.name, '\0', CALC_IDENTIFIER_LENGTH);
 }
 
 
 identList_t* calcP_newIdentList(void) {
 	identList_t* list = malloc(sizeof(identList_t));
 	__stubNode(list);
+	// printf("mk %p\n", list);
 	return list;
 }
 
@@ -30,17 +31,18 @@ void calcP_freeIdentList(identList_t* list) {
 		calcP_freeIdentList(list->left);
 	if (list->right != NULL)
 		calcP_freeIdentList(list->right);
+	// printf("rm %p\n", list);
 	free(list);
 }
 
 
-static inline identList_t* findIdentifier(identList_t* list, const char* name) {
+static inline const identList_t* findIdentifier(const identList_t* list, const char* name) {
 	if (list == NULL) return NULL;
 
 	int cmp;
-	identList_t* prev;
+	const identList_t* prev;
 	while (list != NULL) {
-		cmp = strncmp(name, list->identifier.name, IDENTIFIER_LENGTH);
+		cmp = strncmp(name, list->identifier.name, CALC_IDENTIFIER_LENGTH);
 		if (cmp == 0) {
 			// Identifier exists
 			return list;
@@ -57,17 +59,17 @@ static inline identList_t* findIdentifier(identList_t* list, const char* name) {
 }
 
 
-value_t calc_valueOf(identList_t* list, const char* name) {
-	identList_t* ident = findIdentifier(list, name);
+value_t calc_valueOf(const identList_t* list, const char* name) {
+	const identList_t* ident = findIdentifier(list, name);
 	value_t result = ident != NULL ? ident->identifier.value: NIL;
 	return result;
 }
 
 
-value_t calcP_setRawIdent(identList_t * node, const char* name, value_t val) {
+value_t calcP_setRawIdent(identList_t * node, const char* name, const value_t val) {
 		if (strlen(node->identifier.name) == 0) {
 		// empty (primary) node
-		strncpy(node->identifier.name, name, IDENTIFIER_LENGTH);
+		strncpy(node->identifier.name, name, CALC_IDENTIFIER_LENGTH);
 		node->identifier.value = val;
 		return NIL;
 	}
@@ -75,7 +77,7 @@ value_t calcP_setRawIdent(identList_t * node, const char* name, value_t val) {
 	identList_t* prev;
 	int cmp;
 	while (node != NULL) {
-		cmp = strncmp(name, node->identifier.name, IDENTIFIER_LENGTH);
+		cmp = strncmp(name, node->identifier.name, CALC_IDENTIFIER_LENGTH);
 		if (cmp == 0) {
 			// Identifier exists
 			value_t old = node->identifier.value;
@@ -92,7 +94,7 @@ value_t calcP_setRawIdent(identList_t * node, const char* name, value_t val) {
 
 	// Reached the end and did not find identifier
 	identList_t *id = calcP_newIdentList();
-	strncpy(id->identifier.name, name, IDENTIFIER_LENGTH);
+	strncpy(id->identifier.name, name, CALC_IDENTIFIER_LENGTH);
 	id->identifier.value = val;
 
 	if (cmp < 0)
@@ -105,9 +107,8 @@ value_t calcP_setRawIdent(identList_t * node, const char* name, value_t val) {
 
 /** Assigns new value to identifier with given name and creates it if necessary
  ** It also allows to remove identifier by assigning NIL to it */
-value_t calc_setIdentifier(identList_t* node, const char* name, value_t val) {
+value_t calc_setIdentifier(identList_t* node, const char* name, const value_t val) {
 	if (node == NULL || (*name == '\0')) return NIL;
-
 	if (calc_isValueNil(&val)) 
 		return calc_popIdentifier(node, name);
 	else
@@ -135,7 +136,7 @@ static inline void swapNodes(identList_t *one, identList_t*two) {
 static inline identList_t* deleteIdentifier(identList_t* root, const char* name, identList_t **tofree) {
 	if (root == NULL) return NULL;
 	
-	int cmp = strncmp(name, root->identifier.name, IDENTIFIER_LENGTH);
+	int cmp = strncmp(name, root->identifier.name, CALC_IDENTIFIER_LENGTH);
 	if (cmp > 0) {
 		root->right = deleteIdentifier(root->right, name, tofree);
 		return root;

@@ -4,11 +4,9 @@
 
 #include <calc/lang/tokenvector.h>
 
-// Convert \0-terminated line into vector of tokens
-extern TokenList *lang_tokenizeLine(const char* line);
+/* 
+** Converts a line terminated with '\0' or '\n' into vector of tokens
+*/
+extern TokenList *langP_tokenizeLine(const char* line);
 
-
-// Demo list of tokens
-extern TokenList *lang_demoTokens(void);
-
-#endif
+#endif /* CALC_LANG_LEXER_H */

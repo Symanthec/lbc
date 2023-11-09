@@ -5,29 +5,33 @@
 #include <calc/lang/token.h>
 #include <stddef.h>
 
+
+/* Vector of tokens structure */
 typedef struct {
 	Token* tokens;
 	size_t size, capacity;
 } TokenVector;
 
 
-// Vector should rather be considered a list outside the lexer
+/* Type alias needed to indicate that vector should be treated as immutable. */
 typedef TokenVector TokenList;
 
 
-// Create vector for tokens
+/* Creates vector list for tokens */
 extern TokenVector* lang_newTokens(void);
 
 
-// Push token into vector
-// If vec == NULL, creates new vector
-// Automatically resizes vector when needed
-// Returns pointer to new vector or original (!= NULL)
-extern TokenVector* lang_pushToken(TokenVector *vec, Token t);
+/*
+** Pushes new token into given vector
+**  - If vector is NULL, creates a new vector and returns it
+**  - Automatically resizes vector when needed 
+** Returns pointer to original vector if not NULL or newly created one 
+*/
+extern TokenVector* lang_pushToken(TokenVector *vec, const Token t);
 
 
-// Destroy vector of tokens
-extern void lang_freeTokens(TokenList* vec);
+/* Releases vector of tokens */
+extern void lang_freeTokens(TokenList * const vec);
 
 
-#endif//CALC_LANG_TOKEN_VECTOR_H
+#endif/* CALC_LANG_TOKEN_VECTOR_H */

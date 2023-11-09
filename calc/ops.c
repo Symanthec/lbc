@@ -12,7 +12,7 @@
 
 
 #define OP(op, lop, rop, val) \
-	if (lop.type == VALUE_NIL || rop.type == VALUE_NIL) return NIL; \
+	if (calc_isValueNil(&lop) || calc_isValueNil(&rop)) return NIL;	\
 	value_t val;													\
 	if (lop.type == VALUE_INT && rop.type == VALUE_INT) {			\
 		val.type = VALUE_INT;										\
@@ -26,19 +26,19 @@
 // ========= Math operations =========
 
 
-value_t calc_add(value_t lop, value_t rop) {
+value_t calc_add(const value_t lop, const value_t rop) {
 	OP(+, lop, rop, val);
 	return val;
 }
 
 
-value_t calc_sub(value_t lop, value_t rop) {
+value_t calc_sub(const value_t lop, const value_t rop) {
 	OP(-, lop, rop, val);
 	return val;
 }
 
 
-value_t calc_mul(value_t lop, value_t rop) {
+value_t calc_mul(const value_t lop, const value_t rop) {
 	OP(*, lop, rop, val);
 	return val;
 }
@@ -47,8 +47,8 @@ value_t calc_mul(value_t lop, value_t rop) {
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
 
-value_t calc_div(value_t lop, value_t rop) {
-	if (lop.type == VALUE_NIL || rop.type == VALUE_NIL) return NIL;
+value_t calc_div(const value_t lop, const value_t rop) {
+	if (calc_isValueNil(&lop) || calc_isValueNil(&rop)) return NIL;
 
 	// APPLY GCC DIVISION SEMANTICS
 	bool sign = PICK_VAL(lop) < 0 ^ PICK_VAL(rop) < 0;
@@ -69,8 +69,8 @@ value_t calc_div(value_t lop, value_t rop) {
 }
 
 
-value_t calc_mod(value_t lop, value_t rop) {
-	if (lop.type == VALUE_NIL || rop.type == VALUE_NIL) return NIL;
+value_t calc_mod(const value_t lop, const value_t rop) {
+	if (calc_isValueNil(&lop) || calc_isValueNil(&rop)) return NIL;
 
 	value_t div = calc_div(lop, rop);
 	value_t val;

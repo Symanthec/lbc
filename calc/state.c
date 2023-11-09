@@ -1,18 +1,23 @@
 #include <calc/calc.h>
 #include <stdlib.h>
 
-static void fnDbgTree(AST* tree) {return;}
-static void fnDbgTokens(TokenList* list) {return;}
-static value_t fnCbCastToOld(value_t old, value_t right) {
-	// cast right to old values type
+static void fnDbgTree(const AST * const tree) {return;}
+static void fnDbgTokens(const TokenList * const list) {return;}
+static value_t fnCbCastToOld(const value_t old, const value_t right) {
+	value_t casted;
+
+	/* Cast right value to old value's type */
 	if (old.type == VALUE_INT && right.type == VALUE_REAL) {
-		right.type = VALUE_INT;
-		right.integer = right.real;
+		casted.type = VALUE_INT;
+		casted.integer = right.real;
 	} else if (old.type == VALUE_REAL && right.type == VALUE_INT) {
-		right.type = VALUE_REAL;
-		right.real = right.integer;
+		casted.type = VALUE_REAL;
+		casted.real = right.integer;
+	} else {
+		casted = right;
 	}
-	return right;
+
+	return casted;
 }
 
 
@@ -37,31 +42,31 @@ void calc_freeState(calcState_t *state) {
 }
 
 
-value_t calc_getValue(calcState_t *state, const char* name) {
+value_t calc_getValue(const calcState_t *state, const char* name) {
 	if (state == NULL) return NIL;
 	return calc_valueOf(state->identifiers, name);
 }
 
 
-value_t calc_setValue(calcState_t *state, const char* name, value_t v) {
+value_t calc_setValue(calcState_t *state, const char* name, const value_t v) {
 	if (state == NULL || name == NULL) return NIL;
 	return calcP_setRawIdent(state->staging, name, v);
 }
 
 
-void __calcP_commit(identList_t *from, identList_t *to) {
+void __calc_commit(identList_t *from, identList_t *to) {
 	if (from == NULL || to == NULL) return;
 
 	if (from->left != NULL)
-		__calcP_commit(from->left, to);
+		__calc_commit(from->left, to);
 	if (from->right != NULL)
-		__calcP_commit(from->right, to);
+		__calc_commit(from->right, to);
 	calc_setIdentifier(to, from->identifier.name, from->identifier.value);
 }
 
 
-void calcP_commit(calcState_t* state) {
-	__calcP_commit(state->staging, state->identifiers);
+void calc_commit(calcState_t* state) {
+	__calc_commit(state->staging, state->identifiers);
 	calcP_freeIdentList(state->staging);
 	state->staging = calcP_newIdentList();
 }
@@ -76,17 +81,20 @@ void calcP_commit(calcState_t* state) {
 	return NULL;
 
 
-calc_fnDbgTree calcU_onDebugTree(calcState_t *state, calc_fnDbgTree cb) {
+calc_fnDbgTree calcU_onDebugTree(calcState_t * const	state,
+								const calc_fnDbgTree	cb) {
 	REPLACE_CB(calc_fnDbgTree, state, debugTree, cb);
 }
 
 
-calc_fnDbgTokens calcU_onDebugTokens(calcState_t *state, calc_fnDbgTokens cb) {
+calc_fnDbgTokens calcU_onDebugTokens(calcState_t * const	state,
+									const calc_fnDbgTokens 	cb) {
 	REPLACE_CB(calc_fnDbgTokens, state, debugTokens, cb);
 }
 
 
-calc_fnCbCast calcU_castBehaviour(calcState_t *state, calc_fnCbCast cb) {
+calc_fnCbCast calcU_castBehaviour(calcState_t * const 	state,
+								 const calc_fnCbCast	cb) {
 	REPLACE_CB(calc_fnCbCast, state, valueCaster, cb);
 }
 

@@ -4,22 +4,26 @@
 
 #include <stddef.h>
 
-// Substring inside another string
+/* Substring inside another string */
 typedef struct {
 	const char* start;
 	size_t length;
 } Slice;
 
-// Enumeration of possible token types
+
+/* Enumeration of possible token types */
 typedef enum {
-	FALSE,		//false for conditions only
+	FALSE,		/* False value for use in conditions	*/
 
-	T_NIL, 		// "nil" from Lua
-	T_IDENT,		// variable
-	T_REAL,		// "double" value
-	T_INTEGER,	// "long" value
+	/* MULTI-character token types */
 
-	// Math operations
+	T_NIL, 		/* "nil" from Lua (becomes VALUE_NIL)	*/
+	T_IDENT,	/* Name identifier */
+	T_REAL,		/* Real value (becomes VALUE_REAL)   	*/
+	T_INTEGER,	/* Integer value (becomes VALUE_INT) 	*/
+
+	/* Math operations */
+	
 	ADD,
 	SUB,
 	MUL,
@@ -27,24 +31,28 @@ typedef enum {
 	MOD,
 	EQU,
 
-	// Parentheses
+	/* Parentheses */
+
 	LPAREN,
 	RPAREN,
 	
-	// Some intermediate tokens, which must not occur in
-	// final VALID sequence of tokens
-	END, 	// End of line/sequence, 
-	WHITE,	// Whitespace character 
-	MULTI,	// pickSymbol() indicator of identifier or number
-	INVAL	// Invalid character, error indicator
+	/* Intermediate tokens which must not occur in VALID list of tokens */
+
+	END, 	/* End of line/sequence indicator 					*/ 
+	WHITE,	/* Whitespace character (to be skipped) 			*/
+	MULTI,	/* MULTI-char token indicator for inner use 		*/
+	INVAL	/* Invalid (unexpected) character, error indicator 	*/
 } TokenType;
 
+
+/* Token data structure. Contains type and "slice" where it occurs */
 typedef struct Token {
 	TokenType type;
 	Slice slice;
 } Token;
 
-// Return human readable name of token
-extern const char* lang_tokenName(TokenType type);
 
-#endif//CALC_LANG_TOKEN_H
+/* Return human-readable name of token */
+extern const char* lang_tokenName(const TokenType type);
+
+#endif/* CALC_LANG_TOKEN_H */

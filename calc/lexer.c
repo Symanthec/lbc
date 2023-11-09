@@ -130,9 +130,7 @@ static Token pickIdentifier(const char* start) {
 }
 
 
-TokenVector* lang_tokenizeLine(const char* line) {
-	// return demoTokens();
-
+TokenVector* langP_tokenizeLine(const char* line) {
 	TokenVector *vec = lang_newTokens();
 
 	const char* input = line;
@@ -172,23 +170,5 @@ TokenVector* lang_tokenizeLine(const char* line) {
 		}
 		input += t.slice.length;
 	} while (t.type != END);
-	return vec;
-}
-
-
-TokenVector *demoTokens(void) {
-	Token _0 = {
-		.type = T_IDENT,
-		.slice = { .start = "_13var", .length = 6 }};
-	Token _1 = {
-		.type = EQU,
-		.slice = { .start = "=", .length = 1 }};
-	Token _2 = {
-		.type = T_REAL,
-		.slice = { .start = "3.14159" , .length = 7 }};
-
-	TokenVector *vec = lang_pushToken(NULL, _0);
-	lang_pushToken(vec, _1);
-	lang_pushToken(vec, _2);
 	return vec;
 }

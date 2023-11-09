@@ -1,6 +1,7 @@
 // Recursive descent parser used from Wikipedia:
 // https://en.wikipedia.org/wiki/Recursive_descent_parser
 #include <calc/lang/parser.h>
+#include <calc/error.h>
 #include <stdbool.h>
 
 
@@ -18,17 +19,11 @@ typedef struct {
 
 static inline AST* assignment(TokenIter *);
 
-
-static inline error_t _mkerror(enum Errors code, Token where) {
-	error_t e = { code, where.slice };
-	return e;
-}
-
-#define _(code, where) _mkerror(code, where)
+#define _(code, token) calc_mkError((code), (token).slice)
 
 
 static inline AST* treeError(error_t e) {
-	AST *node = lang_newTree();
+	AST *node = langP_newTree();
 	node->type = ERROR;
 	node->error = e;
 	return node;
@@ -36,7 +31,7 @@ static inline AST* treeError(error_t e) {
 
 
 static inline AST* treeOperation(AST* lhs, AST* rhs, Token op) {
-	AST* node = lang_newTree();
+	AST* node = langP_newTree();
 	node->type = OPERATION;
 	node->lop = lhs;
 	node->rop = rhs;
@@ -46,7 +41,7 @@ static inline AST* treeOperation(AST* lhs, AST* rhs, Token op) {
 
 
 static inline AST* treeValue(NodeType type, Token t) {
-	AST* node = lang_newTree();
+	AST* node = langP_newTree();
 	node->type = type;
 	node->token = t;
 	return node;
@@ -104,7 +99,7 @@ static error_t expect(TokenIter *iter, TokenType t) {
 
 	error_t e = _(SYNTAX, token);
 	if (token.type == END) {
-		e.slice = lastToken(iter).slice;
+		e.where = lastToken(iter).slice;
 		e.code = END_OF_FILE;
 	}
 	return e;
@@ -230,9 +225,9 @@ static AST* assignment(TokenIter *iter) {
 	while ((var = accept(iter, T_IDENT)).type != FALSE) {
 		if ((op = accept(iter, EQU)).type != FALSE) {
 			if (right != NULL)
-				right = right->rop = lang_newTree();
+				right = right->rop = langP_newTree();
 			else
-				left = right = lang_newTree();
+				left = right = langP_newTree();
 			right->type = OPERATION;
 			right->lop = treeValue(IDENTIFIER, var);
 			right->token = op;

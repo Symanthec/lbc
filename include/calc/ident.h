@@ -4,16 +4,19 @@
 
 #include <calc/value.h>
 
-#define IDENTIFIER_LENGTH 256
+/* Compile-time option for maximum variable name length */
+#ifndef CALC_IDENTIFIER_LENGTH
+#define CALC_IDENTIFIER_LENGTH 256
+#endif
 
-
+/* Identifier type data structure */
 typedef struct {
 	value_t value;
-	char name[IDENTIFIER_LENGTH];
+	char name[CALC_IDENTIFIER_LENGTH];
 } ident_t;
 
 
-// Binary search tree
+/* Binary search tree node structure */
 typedef struct identList_t {
 	ident_t identifier;
 	struct identList_t *left;
@@ -21,16 +24,45 @@ typedef struct identList_t {
 } identList_t;
 
 
+/*
+** Creates new binary search tree node and fills it with a stub values
+** NOTE: You don't need to assign .left and .right to NULL - they already are
+*/
 extern identList_t * calcP_newIdentList(void);
+
+/* 
+** Frees the entire binary search tree
+** NOTE: To remove only one node, assign .left = .right = NULL first
+*/
 extern void calcP_freeIdentList(identList_t *);
 
-extern value_t calc_valueOf(identList_t *, const char *);
+/*
+** Return current value of variable named 'name' or NIL if doesn't exist.
+*/
+extern value_t calc_valueOf(const identList_t *list, const char *name);
 
-// can assign nil to variable
-extern value_t calcP_setRawIdent(identList_t *, const char*, value_t);
+/*
+** Assign new value to identifier and create node if necessary
+** Compared to setIdentifier(), it may assign 'nil' to value,
+** whereas setIdentifier() to such variable will popIdentifier()
+*/
+extern value_t calcP_setRawIdent(identList_t*   list,
+								const char*		name,
+								const value_t	val);
 
-// x = nil === delete x
-extern value_t calc_setIdentifier(identList_t *, const char *, value_t);
-extern value_t calc_popIdentifier(identList_t *, const char*);
+/*
+** Assign new value to identifier and create node if necessary
+** Compared to setRawIdent() it will popIdentifier() which is set to 'nil'
+** instead of 'raw' assigning a NIL value to variable
+*/
+extern value_t calc_setIdentifier(identList_t*	list, 
+								const char*		name,
+								const value_t	val);
 
-#endif//CALC_IDENT_H
+/*
+** Delete identifier and return its value
+*/
+extern value_t calc_popIdentifier(identList_t*  list,
+                                const char*     name);
+
+#endif/* CALC_IDENT_H */

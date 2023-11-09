@@ -6,6 +6,8 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include <calc/utils.h>
+#include <stdio.h>
 
 
 #define _ALLOC_VAR_NAME(slice, size, dst)		\
@@ -16,7 +18,7 @@
 
 
 // Create new syntax tree
-AST* lang_newTree(void) {
+AST* langP_newTree(void) {
 	AST *tree = malloc(sizeof(AST));
 	tree->lop = NULL;
 	tree->rop = NULL;
@@ -25,7 +27,7 @@ AST* lang_newTree(void) {
 
 
 // Destroy all tree
-void lang_freeTree(AST * tree) {
+void lang_freeTree(AST * const tree) {
 	if (tree == NULL) return;
 	if (tree->type == OPERATION) {
 		lang_freeTree(tree->lop);
@@ -35,7 +37,7 @@ void lang_freeTree(AST * tree) {
 }
 
 
-const char* nodeNames[4] = {
+const char* nodeNames[] = {
 	"OPERATION",
 	"IDENTIFIER",
 	"VALUE",
@@ -43,7 +45,7 @@ const char* nodeNames[4] = {
 };
 
 
-const char* lang_nodeName(NodeType type) {
+const char* lang_nodeName(const NodeType type) {
 	if (OPERATION <= type && type <= ERROR)
 		return nodeNames[type];
 	else
@@ -51,7 +53,10 @@ const char* lang_nodeName(NodeType type) {
 }
 
 
-static value_t runOp(calcState_t * state, TokenType op, value_t lop, value_t rop) {
+static value_t runOp(const TokenType op,
+					 const value_t 	 lop,
+					 const value_t 	 rop)
+{
 	switch (op) {
 	case ADD:
 		return calc_add(lop, rop);
@@ -115,7 +120,7 @@ static value_t getValue(Token t) {
 
 // Evaluate expression using identifiers of given calcState_t
 // It is assumed that parser checks for all errors except identifiers
-value_t calcP_run(calcState_t * state, AST* tree) {
+value_t calc_run(calcState_t * state, const AST* tree) {
 	if (state == NULL || tree == NULL) return NIL;
 
 	value_t result = NIL;
@@ -142,7 +147,7 @@ value_t calcP_run(calcState_t * state, AST* tree) {
 	else if (type == OPERATION)
 	{
 		// if assignment 
-		value_t right = calcP_run(state, tree->rop);
+		value_t right = calc_run(state, tree->rop);
 		Token op = tree->token;
 		if (op.type == EQU) {
 			// assignment
@@ -157,7 +162,7 @@ value_t calcP_run(calcState_t * state, AST* tree) {
 			calc_setValue(state, name, right);
 			result = right;
 		} else {
-			value_t left = calcP_run(state, tree->lop);
+			value_t left = calc_run(state, tree->lop);
 
 			if (op.type == DIV) {
 				double div = right.type == VALUE_REAL ? right.real : right.integer;
@@ -169,7 +174,6 @@ value_t calcP_run(calcState_t * state, AST* tree) {
 			}
 
 			result = runOp(
-				state,
 				op.type,
 				left,
 				right);

@@ -20,22 +20,6 @@ static bool prompt(const char* prefix, char* dest, size_t maxLength) {
 }
 
 
-static void printError(const char *line, error_t err) {
-	fprintf(stderr,
-		"[Calc error]: %s at %zu\n",
-		calc_getErrorMsg(err.code),
-		err.slice.start - line + 1);
-
-	size_t len = strlen(line);
-	fprintf(stderr, "%s", line);
-	for (size_t i = 0; i < err.slice.start - line && i < len; ++i)
-		fputc(' ', stderr);
-	for (size_t i = 0; i < err.slice.length && i < len; ++i)
-		fputc('^', stderr);
-	fputc('\n', stderr);
-}
-
-
 int main(int argc, char** argv)
 {
 	calcState_t *state = calc_newState();
@@ -46,7 +30,7 @@ int main(int argc, char** argv)
 	error_t err;
 	while (prompt(PROMPT_STRING, line, MAXLINE))
 	{
-		if (strlen(line) <= 0) continue; 
+		if (strlen(line) <= 1) continue; /* '\0' or '\n' */
 
 		// Exit sequence
 		if (strstr(line, EXIT_COMMAND) != NULL)
@@ -56,18 +40,21 @@ int main(int argc, char** argv)
 		if (sscanf(line, EMBED_DEL " %s", del_pending) > 0) 
 		{
 			calc_setValue(state, del_pending, NIL);
-			calcP_commit(state);
+			calc_commit(state);
 		} 
 		else 
 		{
+			// single state execution
 			value_t result = calc_doLine(state, line);
+
 			err = calc_getError(state);
 			if (err.code == OK) {
+				calc_commit(state);
 				calcU_printValue(result);
 				putchar('\n');
 			} else {
 				printf("Error occurred...\n");
-				printError(line, err);
+				calcU_printError(state, line);
 				calc_clearError(state);
 			}
 		}
