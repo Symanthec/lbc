@@ -1,10 +1,10 @@
 #include <calc/calc.h>
 #include <stdlib.h>
 
-
 static void fnDbgTree(AST* tree) {return;}
 static void fnDbgTokens(TokenList* list) {return;}
-static value_t fnCbCast(value_t old, value_t right) {
+static value_t fnCbCastToOld(value_t old, value_t right) {
+	// cast right to old values type
 	if (old.type == VALUE_INT && right.type == VALUE_REAL) {
 		right.type = VALUE_INT;
 		right.integer = right.real;
@@ -24,7 +24,7 @@ calcState_t * calc_newState(void) {
 	// default callbacks
 	calcU_onDebugTree(state, fnDbgTree);
 	calcU_onDebugTokens(state, fnDbgTokens);
-	calcU_castBehaviour(state, fnCbCast);
+	calcU_castBehaviour(state, fnCbCastToOld);
 	return state;
 }
 

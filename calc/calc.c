@@ -42,7 +42,7 @@ value_t calc_doLine(calcState_t *state, const char* in) {
 
 				// print value
 				result = calcP_run(state, parseResult);
-
+				
 				if (calc_getError(state).code == OK)
 					calcP_commit(state); // save changes on success
 			}

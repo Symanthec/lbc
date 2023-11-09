@@ -1,7 +1,7 @@
 #include <calc/utils.h>
 #include <stdio.h>
 
-void calcU_printTokens(TokenList* list) {
+void calcU_printTokens(const TokenList* list) {
 	for (int i = 0; i < list->size; ++i) {
 		Token t = list->tokens[i];
 		printf("%s(\"", lang_tokenName(t.type));
@@ -30,7 +30,7 @@ void calcU_printValue(const value_t v) {
 }
 
 
-static void _printNode(AST* node) {
+static void _printNode(const AST* node) {
 	if (node != NULL) {
 		Slice slice = node->token.slice;
 		printf("%s(", lang_nodeName(node->type));
@@ -46,10 +46,13 @@ static void _printNode(AST* node) {
 }
 
 
-static void _printTree(AST* root, size_t level) {
+#define INDENT_CHR '\t'
+
+
+static void _printTree(const AST* root, const size_t level) {
 	if (root != NULL) {
 		for (size_t i = 0; i < level; ++i)
-			putchar('\t');
+			putchar(INDENT_CHR);
 		_printNode(root);
 		_printTree(root->lop, level + 1);
 		_printTree(root->rop, level + 1);
@@ -57,21 +60,35 @@ static void _printTree(AST* root, size_t level) {
 } 
 
 
-void calcU_printTree(AST* tree) {
+void calcU_printTree(const AST* tree) {
 	_printTree(tree, 0);
 }
 
 
-void calcU_printIdent(ident_t id) {
-	printf("%s = ", id.name);
+void calcU_printIdent(const ident_t id) {
+	printf("\"%s\" = ", id.name);
 	calcU_printValue(id.value);
 }
 
 
-void calcU_printIdentifiers(identList_t *ids) {
+static void __calcU_printIdentifiers(const identList_t *ids, unsigned *counter) {
 	if (ids == NULL) return;
-	calcU_printIdentifiers(ids->left);
-	calcU_printIdent(ids->identifier);
-	printf(", ");
-	calcU_printIdentifiers(ids->right);
+	__calcU_printIdentifiers(ids->left, counter);
+	
+	// is stub node?
+	if (*(ids->identifier.name) != '\0') {
+		if ((*counter)++ > 0) printf(", ");
+		calcU_printIdent(ids->identifier);
+	}
+
+	__calcU_printIdentifiers(ids->right, counter);
+}
+
+
+unsigned calcU_printIdentifiers(const identList_t *ids) {
+	putchar('[');
+	unsigned counter = 0;
+	__calcU_printIdentifiers(ids, &counter);
+	putchar(']');
+	return counter;
 }

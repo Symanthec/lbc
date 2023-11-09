@@ -2,7 +2,6 @@
 // https://en.wikipedia.org/wiki/Recursive_descent_parser
 #include <calc/lang/parser.h>
 #include <stdbool.h>
-#include <stdio.h>
 
 
 // Following operations implemented (priority top to bottom):

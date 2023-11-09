@@ -66,16 +66,17 @@ int main(int argc, char** argv)
 				calcU_printValue(result);
 				putchar('\n');
 			} else {
+				printf("Error occurred...\n");
 				printError(line, err);
 				calc_clearError(state);
 			}
 		}
 
-		calcU_printIdentifiers(state->identifiers);
-		putchar('\n');
+		// Enumerate identifiers, because why not?
+		unsigned count = calcU_printIdentifiers(state->identifiers);
+		printf(" Total: %u\n", count);
 	}
 
-	// Enumerate identifiers, because why not?
 	calc_freeState(state);
 	return 0;
 }

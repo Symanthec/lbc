@@ -2,6 +2,8 @@
 
 // tilde preceeds service tokens
 static const char* NAMES[] = {
+	"~FALSE",
+	
 	"<NIL>",
 	"<IDENTIFIER>",
 	"<REAL>",
