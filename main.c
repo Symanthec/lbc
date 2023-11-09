@@ -7,7 +7,6 @@
 #include <limits.h>
 #include <float.h>
 
-#define CALC_PRNT_VAL_PREC "10"
 #include <calc/calc.h>
 #include <calc/utils.h>
 #include "options.h"
@@ -31,8 +30,8 @@ const char *usage_msg =
 "            Print abstract syntax tree (AST) when compiling line\n"
 "    --nocast\n"
 "            Suppress default type casting to old value's type\n"
-"    --vars\n"
-"            Display all variables NOT prefixed with \"__\" after prompt\n"
+"    --novars\n"
+"            Do not display variables after prompt\n"
 "    --nodelete\n"
 "            Suppress \"delete x\" syntax in favor of default \"x = nil\"\n"
 "    --precise\n"
@@ -50,7 +49,7 @@ options_t options = {
     false, /* .debugTokens      */
     false, /* .debugSyntax      */
     false, /* .suppressCast     */
-    false, /* .showVariables    */
+    true,  /* .showVariables    */
     false, /* .noEmbedDelete    */
     false, /* .preciseFloats    */
     false, /* .extraValues      */
@@ -80,8 +79,8 @@ int main(int argc, char** argv)
                 options.debugSyntax = true;
             else if (strcmp(argument, "--nocast") == 0)
                 options.suppressCast = true;
-            else if (strcmp(argument, "--vars") == 0)
-                options.showVariables = true;
+            else if (strcmp(argument, "--novars") == 0)
+                options.showVariables = false;
             else if (strcmp(argument, "--nodelete") == 0)
                 options.noEmbedDelete = true;
             else if (strcmp(argument, "--precise") == 0)
@@ -120,11 +119,12 @@ int main(int argc, char** argv)
         if (strlen(line) <= 1) continue; /* '\0' or '\n' */
 
         // Exit sequence
-        if (!options.noEmbedDelete && strstr(line, EXIT_COMMAND) != NULL)
+        if (strstr(line, EXIT_COMMAND) != NULL)
             break;
 
         // embed "delete x" functionality over "x = nil"    
-        if (sscanf(line, EMBED_DEL " %s", del_pending) > 0) 
+        if (!options.noEmbedDelete && 
+            sscanf(line, EMBED_DEL " %s", del_pending) > 0) 
         {
             calc_setValue(state, del_pending, NIL);
             calc_commit(state);
